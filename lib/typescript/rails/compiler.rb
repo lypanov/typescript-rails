@@ -1,6 +1,14 @@
 require 'typescript/rails'
 require 'typescript-node'
 
+class TypescriptError < StandardError
+  attr_accessor :path, :message
+  def initialize path, message
+    @path, @message = path, message
+    super(message)
+  end
+end
+
 module Typescript::Rails::Compiler
   class << self
     # @!scope class
@@ -60,7 +68,7 @@ module Typescript::Rails::Compiler
       begin
         ::TypeScript::Node.compile(s, *default_options, *options)
       rescue Exception => e
-        raise "Typescript error in file '#{ts_path}':\n#{e.message}"
+        raise TypescriptError.new(ts_path, e.message)
       end
     end
 
